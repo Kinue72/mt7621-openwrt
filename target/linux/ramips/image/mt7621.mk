@@ -2097,7 +2097,7 @@ define Device/xiaomi_mi-router-cr660x
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   IMAGE/firmware.bin := append-kernel | pad-to $$(KERNEL_SIZE) | append-ubi | \
 	check-size
-  DEVICE_PACKAGES += kmod-mt7915e uboot-envtools
+  DEVICE_PACKAGES += kmod-mt7915e uboot-envtools kmod-hnat-mtk mtkhqos_util
 endef
 
 define Device/xiaomi_mi-router-cr6606

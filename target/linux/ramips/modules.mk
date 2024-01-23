@@ -133,3 +133,20 @@ define KernelPackage/sound-mt7620/description
 endef
 
 $(eval $(call KernelPackage,sound-mt7620))
+
+define KernelPackage/hnat-mtk
+  SUBMENU:=Network Devices
+  TITLE:=Mediatek HNAT module
+  DEPENDS:=@TARGET_ramips +kmod-nf-conntrack
+  KCONFIG:= \
+	CONFIG_BRIDGE_NETFILTER=y \
+	CONFIG_NETFILTER_FAMILY_BRIDGE=y 
+  FILES:= $(LINUX_DIR)/drivers/net/ethernet/mediateksdk/mtk_hnat/mtkhnat.ko
+	AUTOLOAD:=$(call AutoProbe,mtkhnat)
+endef
+
+define KernelPackage/hnat-mtk/description
+  Kernel modules for mediatek HW NAT offloading
+endef
+
+$(eval $(call KernelPackage,hnat-mtk))
