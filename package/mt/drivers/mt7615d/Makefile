@@ -175,7 +175,7 @@ PKG_KCONFIG:= \
 	CHIP_MT7663E \
 	CHIP_MT7626
 
-PKG_CONFIG_DEPENDS:=$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_MTK_$c),CONFIG_$(c)))
+PKG_CONFIG_DEPENDS:=$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_MTK_MT7615_$c),CONFIG_$(c)))
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -185,11 +185,13 @@ define KernelPackage/mt7615d
   CATEGORY:=Kernel modules
   TITLE:=MTK wifi AP driver
   DEPENDS:=@TARGET_ramips
-ifneq ($(CONFIG_MTK_WHNAT_SUPPORT),)
+ifneq ($(CONFIG_MTK_MT7615_WHNAT_SUPPORT),)
   FILES:=$(PKG_BUILD_DIR)/mt_wifi_ap/mt_wifi.ko \
 	$(PKG_BUILD_DIR)/mt_wifi/embedded/plug_in/whnat/mt_whnat.ko
+	AUTOLOAD:=$(call AutoProbe,mt_wifi mt_whnat)
 else
   FILES:=$(PKG_BUILD_DIR)/mt_wifi_ap/mt_wifi.ko
+  AUTOLOAD:=$(call AutoProbe,mt_wifi)
 endif
   SUBMENU:=Wireless Drivers
   MENU:=1
@@ -204,7 +206,7 @@ define Build/Compile
 		CROSS_COMPILE="$(TARGET_CROSS)" \
 		ARCH="$(LINUX_KARCH)" \
 		M="$(PKG_BUILD_DIR)/mt_wifi_ap" \
-		$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_MTK_$c),CONFIG_$(c)=$(CONFIG_MTK_$(c)))) \
+		$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_MTK_MT7615_$c),CONFIG_$(c)=$(CONFIG_MTK_MT7615_$(c)))) \
 		modules
 endef
 

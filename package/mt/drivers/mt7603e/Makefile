@@ -112,6 +112,7 @@ define KernelPackage/mt7603e
   TITLE:=MTK wifi AP driver
   DEPENDS:=@TARGET_ramips
   FILES:=$(PKG_BUILD_DIR)/mt7603_wifi_ap/mt7603e.ko
+  AUTOLOAD:=$(call AutoProbe,mt7603e)
   SUBMENU:=Wireless Drivers
   MENU:=1
 endef

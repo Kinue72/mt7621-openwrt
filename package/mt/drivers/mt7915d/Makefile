@@ -1,0 +1,145 @@
+# All rights reserved.
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+
+include $(TOPDIR)/rules.mk
+include $(INCLUDE_DIR)/kernel.mk
+
+PKG_NAME:=mt7915d
+PKG_VERSION:=7.4.0.0
+P4REV:=8
+PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)
+PKG_KCONFIG:= \
+	SUPPORT_OPENWRT \
+	WIFI_DRIVER \
+	FIRST_IF_MT7915 \
+	FIRST_IF_NONE \
+  SECOND_IF_MT7915 \
+	SECOND_IF_NONE \
+	THIRD_IF_MT7915 \
+	THIRD_IF_NONE \
+	RT_FIRST_IF_RF_OFFSET \
+	RT_SECOND_IF_RF_OFFSET \
+	MT_WIFI \
+	MT_WIFI_PATH \
+	FIRST_IF_EEPROM_FLASH \
+	RT_FIRST_CARD_EEPROM \
+	WIFI_BASIC_FUNC \
+	DOT11_N_SUPPORT \
+	DOT11_VHT_AC \
+	G_BAND_256QAM_SUPPORT \
+	TPC_SUPPORT \
+	ICAP_SUPPORT \
+	SPECTRUM_SUPPORT \
+	BACKGROUND_SCAN_SUPPORT \
+	SMART_CARRIER_SENSE_SUPPORT \
+	MT_DFS_SUPPORT \
+	HDR_TRANS_TX_SUPPORT \
+	HDR_TRANS_RX_SUPPORT \
+	DBDC_MODE \
+	MULTI_PROFILE_SUPPORT \
+	WSC_INCLUDED \
+	WSC_V2_SUPPORT \
+	DOT11W_PMF_SUPPORT \
+	TXBF_SUPPORT \
+	MBO_SUPPORT \
+	IGMP_SNOOP_SUPPORT \
+	RTMP_FLASH_SUPPORT \
+	ATE_SUPPORT \
+	UAPSD \
+	FIRST_IF_IPAILNA \
+	WIFI_MODE_AP \
+	WIFI_MODE_STA \
+	WIFI_MODE_BOTH \
+	MT_AP_SUPPORT \
+	WDS_SUPPORT \
+	WIFI_EAP_FEATURE \
+	MBSS_SUPPORT \
+	APCLI_SUPPORT \
+	MAC_REPEATER_SUPPORT \
+	MUMIMO_SUPPORT \
+	MU_RA_SUPPORT \
+	DOT11R_FT_SUPPORT \
+	DOT11K_RRM_SUPPORT \
+	INTERWORKING \
+	OCE_SUPPORT \
+	MCAST_RATE_SPECIFIC \
+	VOW_SUPPORT \
+	BAND_STEERING \
+	LED_CONTROL_SUPPORT \
+	WNM_SUPPORT \
+	WPA3_SUPPORT \
+	OWE_SUPPORT \
+	WIFI_MT_MAC \
+	MT_MAC \
+	BRCM_256QAM_SUPPORT \
+	CAL_BIN_FILE_SUPPORT \
+	CFG_SUPPORT_FALCON_MURU \
+	CFG_SUPPORT_FALCON_PP \
+	CFG_SUPPORT_FALCON_SR \
+	CFG_SUPPORT_FALCON_TXCMD_DBG \
+	CTXD_MEM_CPY_SUPPORT \
+	DOT11_HE_AX \
+	LINUX_NET_TXQ_SUPPORT \
+	MUMIMO_PLATFORM_PERFORMANCE_LEVEL \
+	SCS_FW_OFFLOAD \
+	SINGLE_SKU \
+	VHT_TXBF_2G_EPIGRAM_IE_SUPPORT \
+	WIFI_DBG_TXCMD \
+	WIFI_TWT_SUPPORT \
+	WLAN_SERVICE \
+	CHIP_MT7915
+
+
+PKG_CONFIG_DEPENDS:=$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_MTK_$c),CONFIG_$(c)))
+
+include $(INCLUDE_DIR)/package.mk
+
+
+TAR_CMD=$(HOST_TAR) -C $(1)/ $(TAR_OPTIONS)
+
+define KernelPackage/mt7915d
+  CATEGORY:=Kernel modules
+  TITLE:=MTK MT7915 wifi AP driver
+ifneq ($(CONFIG_MTK_FAST_NAT_SUPPORT), )
+ifneq ($(CONFIG_NET_MEDIATEK_HNAT), )
+  DEPENDS+=+kmod-mediatek_hnat
+endif
+endif
+ifneq ($(CONFIG_MTK_WHNAT_SUPPORT), )
+ifneq ($(CONFIG_MTK_WARP_V2), )
+  FILES:=$(PKG_BUILD_DIR)/mt_wifi_ap/mt_wifi.ko \
+	$(PKG_BUILD_DIR)/mt_wifi/embedded/plug_in/warp_proxy/mtk_warp_proxy.ko
+  DEPENDS+=+kmod-warp
+else
+  FILES:=$(PKG_BUILD_DIR)/mt_wifi_ap/mt_wifi.ko \
+	$(PKG_BUILD_DIR)/mt_wifi/embedded/plug_in/whnat/mt_whnat.ko
+endif
+else
+  FILES:=$(PKG_BUILD_DIR)/mt_wifi_ap/mt_wifi.ko
+endif  
+  SUBMENU:=Wireless Drivers
+  MENU:=1
+endef
+
+define KernelPackage/mt7915d/config
+	source "$(SOURCE)/config.in"
+endef
+
+
+define Build/Compile
+	$(MAKE) -C "$(LINUX_DIR)" V=0 \
+		CROSS_COMPILE="$(TARGET_CROSS)" \
+		ARCH="$(LINUX_KARCH)" \
+		M="$(PKG_BUILD_DIR)/mt_wifi_ap" \
+		LINUX_DIR="$(KERNEL_BUILD_DIR)" \
+		$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_MTK_$c),CONFIG_$(c)=$(CONFIG_MTK_$(c)))) \
+		modules
+endef
+
+define KernelPackage/mt7915d/install
+	$(INSTALL_DIR) $(1)/etc/wireless/mt7615
+endef
+
+$(eval $(call KernelPackage,mt7915d))

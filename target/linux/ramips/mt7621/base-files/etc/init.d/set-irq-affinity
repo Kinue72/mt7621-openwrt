@@ -11,11 +11,9 @@ start() {
 		return
 	fi
 
-	for irq in $(grep "mt76..e" /proc/interrupts | cut -d: -f1 | sed 's, *,,')
-	do
-		echo "$mask" > "/proc/irq/$irq/smp_affinity"
-		[ $mask = 4 ] && mask=8
+	for irq in $(grep -E "mt|ra" /proc/interrupts | cut -d: -f1 | sed 's, *,,'); do
+		echo "2" > "/proc/irq/$irq/smp_affinity"
 	done
 
-  /sbin/mtk-wifi.sh &
+  /etc/init.d/wireless_startup.sh &
 }
