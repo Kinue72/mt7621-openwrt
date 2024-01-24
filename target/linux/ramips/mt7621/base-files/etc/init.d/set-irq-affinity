@@ -16,4 +16,6 @@ start() {
 		echo "$mask" > "/proc/irq/$irq/smp_affinity"
 		[ $mask = 4 ] && mask=8
 	done
+
+  /sbin/mtk-wifi.sh &
 }
